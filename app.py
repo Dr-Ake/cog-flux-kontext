@@ -1,6 +1,9 @@
 import gradio as gr
 from PIL import Image
+import os
 try:
+    if os.name == "nt":
+        raise ImportError
     from cog import Path  # type: ignore
 except Exception:  # pragma: no cover - fallback for non-cog environments
     from pathlib import Path
