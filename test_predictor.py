@@ -8,7 +8,10 @@ This script imports the predictor, sets it up, and calls predict with all aspect
 # os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 
 from predict import FluxDevKontextPredictor
-from cog import Path
+try:
+    from cog import Path  # type: ignore
+except Exception:  # pragma: no cover - fallback for non-cog environments
+    from pathlib import Path
 import time
 
 
