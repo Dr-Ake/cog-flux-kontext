@@ -9,7 +9,10 @@ from transformers import (
     AutoModelForImageClassification,
     ViTImageProcessor,
 )
-from cog import Path
+try:
+    from cog import Path  # type: ignore
+except Exception:  # pragma: no cover - fallback for non-cog environments
+    from pathlib import Path
 
 from weights import download_weights
 from util import print_timing

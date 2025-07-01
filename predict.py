@@ -2,7 +2,11 @@ import os
 import time
 import torch
 from PIL import Image
-from cog import BasePredictor, Path, Input
+from cog import BasePredictor, Input
+try:
+    from cog import Path  # type: ignore
+except Exception:  # pragma: no cover - fallback for non-cog environments
+    from pathlib import Path
 
 from flux.sampling import denoise, get_schedule, prepare_kontext, unpack
 from flux.util import (
