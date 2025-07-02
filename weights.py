@@ -3,6 +3,7 @@ from pathlib import Path
 import requests
 import tarfile
 import tempfile
+from tqdm import tqdm
 
 
 def download_weights(url: str, dest: Path):
@@ -14,7 +15,8 @@ def download_weights(url: str, dest: Path):
     dest = Path(dest)
 
     def _download_file(source: str, target: Path, retries: int = 3) -> None:
-        """Stream ``source`` to ``target`` using ``requests`` with simple resume"""
+        """Stream ``source`` to ``target`` using ``requests`` with simple resume
+        and a progress bar."""
 
         bytes_downloaded = target.stat().st_size if target.exists() else 0
         mode = "ab" if bytes_downloaded else "wb"
@@ -26,10 +28,20 @@ def download_weights(url: str, dest: Path):
                     source, stream=True, headers=headers, timeout=60
                 )
                 response.raise_for_status()
-                with open(target, mode) as fh:
+                total = response.headers.get("Content-Length")
+                total_size = int(total) + bytes_downloaded if total is not None else None
+
+                with open(target, mode) as fh, tqdm(
+                    total=total_size,
+                    initial=bytes_downloaded,
+                    unit="B",
+                    unit_scale=True,
+                    desc=f"Downloading {target.name}",
+                ) as pbar:
                     for chunk in response.iter_content(chunk_size=1024 * 1024):
                         if chunk:
                             fh.write(chunk)
+                            pbar.update(len(chunk))
                 return
             except (
                 requests.exceptions.ChunkedEncodingError,
