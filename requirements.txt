@@ -15,6 +15,7 @@ pybase64
 pydash
 Pillow
 requests
+tqdm
 gradio
 cog
 polygraphy
