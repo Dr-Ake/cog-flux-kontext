@@ -1,6 +1,7 @@
 import os
 import time
 import torch
+import gc
 from PIL import Image
 from cog import BasePredictor, Input
 
@@ -46,6 +47,7 @@ class FluxDevKontextPredictor(BasePredictor):
     def setup(self) -> None:
         """Load model weights and initialize the pipeline"""
         self.device = torch.device("cuda")
+        cpu = torch.device("cpu")
 
         # Download all weights if needed
         download_model_weights()
@@ -53,17 +55,25 @@ class FluxDevKontextPredictor(BasePredictor):
         # Initialize models
         st = time.time()
         print("Loading t5...")
-        self.t5 = load_t5(self.device, max_length=512, t5_path=T5_WEIGHTS_PATH)
+        self.t5 = load_t5(cpu, max_length=512, t5_path=T5_WEIGHTS_PATH).to(self.device)
+        gc.collect()
         print(f"Loaded t5 in {time.time() - st} seconds")
+
         st = time.time()
-        self.clip = load_clip(self.device, clip_path=CLIP_PATH)
+        self.clip = load_clip(cpu, clip_path=CLIP_PATH).to(self.device)
+        gc.collect()
         print(f"Loaded clip in {time.time() - st} seconds")
+
         st = time.time()
-        self.model = load_kontext_model(device=self.device)
+        self.model = load_kontext_model(device=cpu).to(self.device)
+        gc.collect()
         print(f"Loaded kontext model in {time.time() - st} seconds")
+
         st = time.time()
-        self.ae = load_ae_local(device=self.device)
+        self.ae = load_ae_local(device=cpu).to(self.device)
+        gc.collect()
         print(f"Loaded ae in {time.time() - st} seconds")
+
         st = time.time()
         self.model = torch.compile(self.model, dynamic=True)
 

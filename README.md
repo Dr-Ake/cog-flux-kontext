@@ -19,8 +19,10 @@ cog predict -i prompt="make the hair blue" -i input_image=@lady.png
 ```
 
 All required model weights are downloaded from Replicate the first time you run
-the predictor and cached under `models/`. The predictor uses `torch.compile`
-and stores the compiled model so subsequent runs are faster.
+the predictor and cached under `models/`. To reduce GPU memory usage at start-up
+the T5 encoder, CLIP embedder, Kontext transformer and autoencoder are loaded on
+the CPU and moved to the GPU after initialisation. The predictor uses
+`torch.compile` and stores the compiled model so subsequent runs are faster.
 
 ## Running the demo UI
 
